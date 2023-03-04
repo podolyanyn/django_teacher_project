@@ -6,3 +6,4 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('hello/', views.hello),
 ]
+# message from Igor
