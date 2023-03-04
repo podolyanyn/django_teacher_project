@@ -5,6 +5,7 @@ from .models import Question, Choice
 from django.http import Http404
 from django.urls import reverse
 from django.views import generic
+from .forms import QuestionForm
 
 def hello(request):
     return HttpResponse("Hello, world !")
@@ -44,3 +45,19 @@ def vote(request, question_id):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+
+
+def add_question(request):
+    if request.method == 'GET':
+        form = QuestionForm()
+        return render(request, 'polls/add_question.html', {'form': form})
+    else:
+        form = QuestionForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            question = Question(question_text=form.cleaned_data['question_text'], pub_date=form.cleaned_data['pub_date'])
+            question.save()
+
+            # redirect to a new URL:
+            return HttpResponse('Thanks for new question !')
