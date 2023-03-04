@@ -50,7 +50,7 @@ def vote(request, question_id):
 def add_question(request):
     if request.method == 'GET':
         form = QuestionForm()
-        return render(request, 'polls/add_question.html', {'form': form})
+        return render(request, 'polls/question.html', {'form': form})
     else:
         form = QuestionForm(request.POST)
         # check whether it's valid:
@@ -59,5 +59,19 @@ def add_question(request):
             question = Question(question_text=form.cleaned_data['question_text'], pub_date=form.cleaned_data['pub_date'])
             question.save()
 
+            # redirect to a new URL:
+            return HttpResponse('Thanks for new question !')
+
+
+def update_question(request, question_id):
+    question=Question.objects.get(id=question_id)
+    if request.method == 'GET':
+        form = QuestionForm(instance=question)
+        return render(request, 'polls/question.html', {'form': form})
+    else:
+        form = QuestionForm(request.POST, instance=question)
+        # check whether it's valid:
+        if form.is_valid():
+            form.save()
             # redirect to a new URL:
             return HttpResponse('Thanks for new question !')
