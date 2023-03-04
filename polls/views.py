@@ -5,6 +5,8 @@ from .models import Question, Choice
 from django.http import Http404
 from django.urls import reverse
 from django.views import generic
+from .forms import QuestionForm
+from django.utils import timezone
 
 def hello(request):
     return HttpResponse("Hello, world !")
@@ -15,12 +17,19 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         """Return the last five published questions."""
-        return Question.objects.order_by('-pub_date')[:5]
+        # return Question.objects.order_by('-pub_date')[:5]
+        return Question.objects.filter(pub_date__lte=timezone.now()).order_by('-pub_date')[:5]
 
 
 class DetailView(generic.DetailView):
     model = Question
     template_name = 'polls/detail.html'
+
+    def get_queryset(self):
+        """
+        Excludes any questions that aren't published yet.
+        """
+        return Question.objects.filter(pub_date__lte=timezone.now())
 
 
 class ResultsView(generic.DetailView):
@@ -44,3 +53,33 @@ def vote(request, question_id):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+
+
+def add_question(request):
+    if request.method == 'GET':
+        form = QuestionForm()
+        return render(request, 'polls/question.html', {'form': form})
+    else:
+        form = QuestionForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            question = Question(question_text=form.cleaned_data['question_text'], pub_date=form.cleaned_data['pub_date'])
+            question.save()
+
+            # redirect to a new URL:
+            return HttpResponse('Thanks for new question !')
+
+
+def update_question(request, question_id):
+    question=Question.objects.get(id=question_id)
+    if request.method == 'GET':
+        form = QuestionForm(instance=question)
+        return render(request, 'polls/question.html', {'form': form})
+    else:
+        form = QuestionForm(request.POST, instance=question)
+        # check whether it's valid:
+        if form.is_valid():
+            form.save()
+            # redirect to a new URL:
+            return HttpResponse('Thanks for new question !')
