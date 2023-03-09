@@ -1,22 +1,22 @@
 {% extends "polls/base.html" %}
 {% block content %}
 
-    {% load crispy_forms_tags %}
+{#    {% load crispy_forms_tags %}#}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#    <meta charset="UTF-8">#}
+{#    <title>Title</title>#}
+{#</head>#}
+{#<body>#}
     <form method="post">
         {% csrf_token %}
-{#        {{ form.as_p }}#}
-        {%  crispy form  %}
+        {{ form.as_p }}
+{#        {%  crispy form  %}#}
         <input type="submit" value="Submit">
     </form>
-</body>
-</html>
+{#</body>#}
+{#</html>#}
 
 {% endblock %}

@@ -7,10 +7,14 @@ from django.urls import reverse
 from django.views import generic
 from .forms import QuestionForm
 from django.utils import timezone
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 def hello(request):
     return HttpResponse("Hello, world !")
 
+# class IndexView(LoginRequiredMixin, generic.ListView):
+# class IndexView(PermissionRequiredMixin, generic.ListView):
+#     permission_required = 'polls.view_question'
 class IndexView(generic.ListView):
     template_name = 'polls/index.html'
     context_object_name = 'latest_question_list'
@@ -64,15 +68,21 @@ def add_question(request):
         # check whether it's valid:
         if form.is_valid():
             # process the data in form.cleaned_data as required
-            question = Question(question_text=form.cleaned_data['question_text'], pub_date=form.cleaned_data['pub_date'])
+            question = Question(question_text=form.cleaned_data['question_text'],
+                                pub_date=form.cleaned_data['pub_date'],
+                                user=form.cleaned_data['user'])
             question.save()
 
             # redirect to a new URL:
-            return HttpResponse('Thanks for new question !')
+            return render(request, 'polls/text.html', {'text': 'Thanks for new question !'})
+            # return HttpResponse('Thanks for new question !')
 
 
 def update_question(request, question_id):
     question=Question.objects.get(id=question_id)
+    if request.user.id != question.user_id:
+        return render(request, 'polls/text.html', {'text': 'This question is not your !'})
+
     if request.method == 'GET':
         form = QuestionForm(instance=question)
         return render(request, 'polls/question.html', {'form': form})
@@ -82,4 +92,5 @@ def update_question(request, question_id):
         if form.is_valid():
             form.save()
             # redirect to a new URL:
-            return HttpResponse('Thanks for new question !')
+            return render(request, 'polls/text.html', {'text': 'Thanks for update question !'})
+            # return HttpResponse('Thanks for new question !')
