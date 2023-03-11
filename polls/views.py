@@ -1,3 +1,5 @@
+import asyncio
+
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 # from django.template import loader
@@ -8,6 +10,7 @@ from django.views import generic
 from .forms import QuestionForm
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from asgiref.sync import sync_to_async
 
 def hello(request):
     return HttpResponse("Hello, world !")
@@ -94,3 +97,14 @@ def update_question(request, question_id):
             # redirect to a new URL:
             return render(request, 'polls/text.html', {'text': 'Thanks for update question !'})
             # return HttpResponse('Thanks for new question !')
+
+
+@sync_to_async
+def index_async(request):
+    latest_question_list = Question.objects.order_by('-pub_date')[:5]
+    output = ', '.join([q.question_text for q in latest_question_list])
+    return HttpResponse(output)
+
+
+async def hello_async(request):
+    return HttpResponse("Hello, world !")
